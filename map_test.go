@@ -1,6 +1,7 @@
 package par
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	"testing"
@@ -45,7 +46,7 @@ func TestParMapChunked(t *testing.T) {
 		r := MapFloat64Chunked(cheap, data)
 		check := mapSerial(cheap, data)
 
-		compareVectors(t, r, check, "parMapChunked")
+		compareVectors(t, r, check, fmt.Sprintf("ParMapChunked(%d)", i))
 	}
 }
 
@@ -56,7 +57,7 @@ func TestParMapInterleaved(t *testing.T) {
 		r := MapFloat64Interleaved(cheap, data)
 		check := mapSerial(cheap, data)
 
-		compareVectors(t, r, check, "parMapInterleaved")
+		compareVectors(t, r, check, fmt.Sprintf("ParMapInterleaved(%d)", i))
 	}
 }
 

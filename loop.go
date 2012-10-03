@@ -21,11 +21,17 @@ func ForChunked(begin, end int, f func(int)) error {
 
 	n := end - begin
 	cpus := min(runtime.GOMAXPROCS(0), n)
-	sem := make(semaphore, cpus)
 	chunkSize := max(n/cpus, 1)
+	sem := make(semaphore, cpus)
 
-	for i := begin; i < end; i += chunkSize {
-		go chunkedWorker(sem, i, end, chunkSize, f)
+	for i, chunks := begin, 1; i < end; i, chunks = i+chunkSize, chunks+1 {
+		if chunks == cpus {
+			// Last Goroutine takes leftovers as well.
+			go chunkedWorker(sem, i, end, f)
+			break
+		} else {
+			go chunkedWorker(sem, i, i+chunkSize, f)
+		}
 	}
 
 	for i := 0; i < cpus; i++ {
@@ -35,11 +41,8 @@ func ForChunked(begin, end int, f func(int)) error {
 	return nil
 }
 
-func chunkedWorker(sem semaphore, begin, end, chunkSize int, f func(int)) {
-	for i := begin; i < begin+chunkSize; i++ {
-		if i >= end {
-			break
-		}
+func chunkedWorker(sem semaphore, begin, end int, f func(int)) {
+	for i := begin; i < end; i++ {
 		f(i)
 	}
 
