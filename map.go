@@ -1,4 +1,4 @@
-package parmap
+package par
 
 import (
 	"runtime"
