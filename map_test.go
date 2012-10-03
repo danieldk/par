@@ -28,7 +28,7 @@ func makeData(n uint) []float64 {
 	return data
 }
 
-func parMapSerial(f func(float64) float64, l []float64) []float64 {
+func mapSerial(f func(float64) float64, l []float64) []float64 {
 	result := make([]float64, len(l))
 
 	for idx, val := range l {
@@ -42,8 +42,8 @@ func TestParMapChunked(t *testing.T) {
 	for i := uint(1); i < maxsize; i *= 2 {
 		data := makeData(i)
 
-		r := ParMapChunked(cheap, data)
-		check := parMapSerial(cheap, data)
+		r := MapFloat64Chunked(cheap, data)
+		check := mapSerial(cheap, data)
 
 		compareVectors(t, r, check, "parMapChunked")
 	}
@@ -53,8 +53,8 @@ func TestParMapInterleaved(t *testing.T) {
 	for i := uint(1); i < maxsize; i *= 2 {
 		data := makeData(i)
 
-		r := ParMapInterleaved(cheap, data)
-		check := parMapSerial(cheap, data)
+		r := MapFloat64Interleaved(cheap, data)
+		check := mapSerial(cheap, data)
 
 		compareVectors(t, r, check, "parMapInterleaved")
 	}
