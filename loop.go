@@ -12,7 +12,8 @@ type semaphore chan empty
 type ParallelForLoop func(begin, end int, f func(int)) error
 
 // Parallel for-loop that divides the work set in N chunks, where N is the
-// number of CPUs. The data is linearly divided.
+// number of CPUs. The data is linearly divided. The loop will return an
+// error iff begin > end.
 func ForChunked(begin, end int, f func(int)) error {
 	if begin > end {
 		return errors.New("Starting index should not be higher than end index.")
@@ -47,7 +48,8 @@ func chunkedWorker(sem semaphore, begin, end, chunkSize int, f func(int)) {
 
 // Parallel for-loop that divides the work set in N chunks, where N is the
 // number of CPUs. The data is divided by interleaving. Use when the
-// computation time will be uneven over regions of indices.
+// computation time will be uneven over regions of indices. The loop will
+// return an error iff begin > end.
 func ForInterleaved(begin, end int, f func(int)) error {
 	if begin > end {
 		return errors.New("Starting index should not be higher than end index.")
