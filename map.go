@@ -4,7 +4,7 @@ package par
 func MapFloat64(loop ParallelForLoop, f func(float64) float64, l []float64) []float64 {
 	result := make([]float64, len(l))
 
-	loop(0, len(l), func(idx int) {
+	loop(0, uint(len(l)), func(idx uint) {
 		result[idx] = f(l[idx])
 	})
 
@@ -21,7 +21,7 @@ func MapFloat64Interleaved(f func(float64) float64, l []float64) []float64 {
 	return MapFloat64(ForInterleaved, f, l)
 }
 
-func max(l, r int) int {
+func max(l, r uint) uint {
 	if l > r {
 		return l
 	}
@@ -29,7 +29,7 @@ func max(l, r int) int {
 	return r
 }
 
-func min(l, r int) int {
+func min(l, r uint) uint {
 	if l < r {
 		return l
 	}
