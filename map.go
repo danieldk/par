@@ -4,7 +4,7 @@ package par
 func MapFloat64(loop ParallelForLoop, f func(float64) float64, l []float64) []float64 {
 	result := make([]float64, len(l))
 
-	loop(0, uint(len(l)), func(idx uint) {
+	loop(0, uint(len(l)), 1, func(idx uint) {
 		result[idx] = f(l[idx])
 	})
 

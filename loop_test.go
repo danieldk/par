@@ -20,7 +20,7 @@ func genericForTest(t *testing.T, name string, loop ParallelForLoop) {
 	for i := uint(1); i < maxsize; i *= 2 {
 		data := makeBoolData(i)
 
-		ForInterleaved(0, uint(len(data)), func(idx uint) {
+		ForInterleaved(0, uint(len(data)), 1, func(idx uint) {
 			data[idx] = true
 		})
 

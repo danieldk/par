@@ -9,12 +9,12 @@ type empty struct{}
 
 type semaphore chan empty
 
-type ParallelForLoop func(begin, end uint, f func(uint)) error
+type ParallelForLoop func(begin, end, step uint, f func(uint)) error
 
 // Parallel for-loop that divides the work set in N chunks, where N is the
 // number of CPUs. The data is linearly divided. The loop will return an
 // error iff begin > end.
-func ForChunked(begin, end uint, f func(uint)) error {
+func ForChunked(begin, end, step uint, f func(uint)) error {
 	if begin > end {
 		return errors.New("Starting index should not be higher than end index.")
 	}
@@ -27,10 +27,10 @@ func ForChunked(begin, end uint, f func(uint)) error {
 	for i, chunks := begin, uint(1); i < end; i, chunks = i+chunkSize, chunks+1 {
 		if chunks == cpus {
 			// Last Goroutine takes leftovers as well.
-			go chunkedWorker(sem, i, end, f)
+			go chunkedWorker(sem, i, end, step, f)
 			break
 		} else {
-			go chunkedWorker(sem, i, i+chunkSize, f)
+			go chunkedWorker(sem, i, i+chunkSize, step, f)
 		}
 	}
 
@@ -41,8 +41,8 @@ func ForChunked(begin, end uint, f func(uint)) error {
 	return nil
 }
 
-func chunkedWorker(sem semaphore, begin, end uint, f func(uint)) {
-	for i := begin; i < end; i++ {
+func chunkedWorker(sem semaphore, begin, end, step uint, f func(uint)) {
+	for i := begin; i < end; i += step {
 		f(i)
 	}
 
@@ -53,7 +53,7 @@ func chunkedWorker(sem semaphore, begin, end uint, f func(uint)) {
 // number of CPUs. The data is divided by interleaving. Use when the
 // computation time will be uneven over regions of indices. The loop will
 // return an error iff begin > end.
-func ForInterleaved(begin, end uint, f func(uint)) error {
+func ForInterleaved(begin, end, step uint, f func(uint)) error {
 	if begin > end {
 		return errors.New("Starting index should not be higher than end index.")
 	}
@@ -62,7 +62,7 @@ func ForInterleaved(begin, end uint, f func(uint)) error {
 	sem := make(semaphore, cpus)
 
 	for i := uint(0); i < cpus; i++ {
-		go interleavedWorker(sem, cpus, begin+i, end, f)
+		go interleavedWorker(sem, cpus, begin+(i*step), end, step, f)
 	}
 
 	// Block until workers are done.
@@ -73,8 +73,8 @@ func ForInterleaved(begin, end uint, f func(uint)) error {
 	return nil
 }
 
-func interleavedWorker(sem semaphore, cpus, begin, end uint, f func(uint)) {
-	for i := begin; i < end; i += cpus {
+func interleavedWorker(sem semaphore, cpus, begin, end, step uint, f func(uint)) {
+	for i := begin; i < end; i += (cpus * step) {
 		f(i)
 	}
 
