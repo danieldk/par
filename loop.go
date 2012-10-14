@@ -22,15 +22,21 @@ func ForChunked(begin, end, step uint, f func(uint)) error {
 	n := end - begin
 	cpus := min(uint(runtime.GOMAXPROCS(0)), n)
 	chunkSize := max(n/cpus, 1)
+
 	sem := make(semaphore, cpus)
 
 	for i, chunks := begin, uint(1); i < end; i, chunks = i+chunkSize, chunks+1 {
+		// The worker should start at the first index that is begin + (n * step)
+		workerBegin := i
+		for ; (workerBegin-begin)%step == 0 && workerBegin < end; workerBegin++ {
+		}
+
 		if chunks == cpus {
 			// Last Goroutine takes leftovers as well.
-			go chunkedWorker(sem, i, end, step, f)
+			go chunkedWorker(sem, workerBegin, end, step, f)
 			break
 		} else {
-			go chunkedWorker(sem, i, i+chunkSize, step, f)
+			go chunkedWorker(sem, workerBegin, workerBegin+chunkSize, step, f)
 		}
 	}
 
