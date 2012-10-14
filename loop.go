@@ -28,7 +28,7 @@ func ForChunked(begin, end, step uint, f func(uint)) error {
 	for i, chunks := begin, uint(1); i < end; i, chunks = i+chunkSize, chunks+1 {
 		// The worker should start at the first index that is begin + (n * step)
 		workerBegin := i
-		for ; (workerBegin-begin)%step == 0 && workerBegin < end; workerBegin++ {
+		for ; (workerBegin-begin)%step != 0 && workerBegin < end; workerBegin++ {
 		}
 
 		if chunks == cpus {
