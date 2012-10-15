@@ -12,7 +12,7 @@
 // CPU cores. This package provides such parallel loops. E.g. the
 // loop above could be replaced by:
 //
-//     par.ForInterleaved(0, n, doSomething)
+//     par.ForInterleaved(0, n, 1, doSomething)
 //
 // The value of GOMAXPROCS is used to determine the number of Goroutines
 // being used.
