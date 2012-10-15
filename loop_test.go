@@ -4,27 +4,27 @@ import (
 	"testing"
 )
 
-func makeBoolData(n uint) []bool {
-	return make([]bool, n)
+func makeUIntData(n uint) []uint {
+	return make([]uint, n)
 }
 
-func verifyAllTrue(t *testing.T, name string, data []bool) {
+func verifyAllOne(t *testing.T, name string, data []uint) {
 	for idx, val := range data {
-		if !val {
-			t.Errorf("%s[%d] == false, expected true", name, idx)
+		if val != 1 {
+			t.Errorf("%s[%d] == %d, expected 1", name, idx, val)
 		}
 	}
 }
 
 func genericForTest(t *testing.T, name string, loop ParallelForLoop) {
 	for i := uint(1); i < maxsize; i *= 2 {
-		data := makeBoolData(i)
+		data := makeUIntData(i)
 
 		ForInterleaved(0, uint(len(data)), 1, func(idx uint) {
-			data[idx] = true
+			data[idx]++
 		})
 
-		verifyAllTrue(t, name, data)
+		verifyAllOne(t, name, data)
 	}
 }
 
