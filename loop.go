@@ -36,7 +36,7 @@ func ForChunked(begin, end, step uint, f func(uint)) error {
 			go chunkedWorker(sem, workerBegin, end, step, f)
 			break
 		} else {
-			go chunkedWorker(sem, workerBegin, workerBegin+chunkSize, step, f)
+			go chunkedWorker(sem, workerBegin, i+chunkSize, step, f)
 		}
 	}
 
