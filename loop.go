@@ -27,8 +27,9 @@ func ForChunked(begin, end, step uint, f func(uint)) error {
 
 	for i, chunks := begin, uint(1); i < end; i, chunks = i+chunkSize, chunks+1 {
 		// The worker should start at the first index that is begin + (n * step)
-		offset := (step - (i - begin)) % step
-		workerBegin := min(i + offset, end)
+		workerBegin := i
+		for ; (workerBegin-begin)%step != 0 && workerBegin < end; workerBegin++ {
+		}
 
 		if chunks == cpus {
 			// Last Goroutine takes leftovers as well.
@@ -67,7 +68,7 @@ func ForInterleaved(begin, end, step uint, f func(uint)) error {
 	sem := make(semaphore, cpus)
 
 	for i := uint(0); i < cpus; i++ {
-		go interleavedWorker(sem, begin+(i*step), end, cpus * step, f)
+		go interleavedWorker(sem, cpus, begin+(i*step), end, step, f)
 	}
 
 	// Block until workers are done.
@@ -78,8 +79,8 @@ func ForInterleaved(begin, end, step uint, f func(uint)) error {
 	return nil
 }
 
-func interleavedWorker(sem semaphore, begin, end, step uint, f func(uint)) {
-	for i := begin; i < end; i += step {
+func interleavedWorker(sem semaphore, cpus, begin, end, step uint, f func(uint)) {
+	for i := begin; i < end; i += (cpus * step) {
 		f(i)
 	}
 
